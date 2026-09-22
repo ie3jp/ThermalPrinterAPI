@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+/* floating-vue tooltip customization */
+.v-popper--theme-tooltip .v-popper__inner {
+  max-width: 320px;
+  white-space: pre-line;
+  font-size: 12px;
+  line-height: 1.5;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: #1f2937;
+  color: #f3f4f6;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}

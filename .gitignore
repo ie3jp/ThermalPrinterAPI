@@ -1,0 +1,20 @@
+node_modules/
+dist/
+.env
+*.log
+.DS_Store
+src/**/*.js
+src/**/*.d.ts
+.node-cache/
+release/
+
+# Vendor SDK and sample files: local installation only
+src/server/lib/cxmlp-api.js
+ref/
+# Local history / settings / packaged applications
+.claude/
+.vscode/
+*.bundle
+*.zip
+*.app/
+local-history/

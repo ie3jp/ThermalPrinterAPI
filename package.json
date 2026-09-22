@@ -1,0 +1,50 @@
+{
+  "name": "print-api",
+  "version": "1.1.0",
+  "description": "Citizen CTS255 サーマルプリンタ用 印刷API",
+  "type": "module",
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "preinstall": "npx only-allow pnpm",
+    "dev": "concurrently -k \"pnpm dev:server\" \"sleep 2 && pnpm dev:client\"",
+    "dev:server": "tsx watch src/server/index.ts",
+    "dev:client": "vite",
+    "build": "pnpm build:server && pnpm build:client",
+    "build:server": "node scripts/check-sdk.mjs && tsc -p tsconfig.server.json && node scripts/check-sdk.mjs --copy",
+    "build:client": "vite build",
+    "start": "node dist/server/index.js",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "package:mac": "./scripts/build-app.sh",
+    "sdk:install": "node scripts/install-sdk.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@hono/node-server": "^1.19.9",
+    "floating-vue": "^5.2.2",
+    "hono": "^4.11.5",
+    "lucide-vue-next": "^0.563.0",
+    "node-osc": "^11.2.2",
+    "sharp": "^0.34.5"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.18",
+    "@types/node": "^25.0.10",
+    "@vitejs/plugin-vue": "^6.0.3",
+    "autoprefixer": "^10.4.23",
+    "concurrently": "^9.2.1",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.18",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1",
+    "vitest": "^4.0.18",
+    "vue": "^3.5.27"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
