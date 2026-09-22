@@ -1,43 +1,45 @@
 # ThermalPrinterAPI
 
-サーマルプリンタを、ブラウザのGUI・HTTP API・OSCから操作するための小さなツールです。
+English | [日本語](README.ja.md)
 
-IE3がTOKYO PROTOTYPEで展示した **Proto-rait** の制作に合わせて開発しました。作品側のプログラムから印刷を呼び出せるようにし、紙幅や画像の階調、コマンドの組み合わせはGUIで試せる構成にしています。
+A small tool for controlling a thermal printer through a browser GUI, HTTP API, or OSC.
 
-対象は **CITIZEN CT-S255のXML Printサービスを利用できるネットワーク構成**です。USB接続のみのモデルや他社製プリンタへの対応は確認していません。CITIZENの公式製品ではありません。
+Developed by IE3 for **Proto-rait**, exhibited at TOKYO PROTOTYPE. It lets an artwork's software trigger printing while providing a GUI for experimenting with paper width, image tones, and command sequences.
 
-## できること
+Designed for a **network setup with access to the CITIZEN CT-S255 XML Print service**. USB-only models and printers from other manufacturers have not been tested. This is not an official CITIZEN product.
 
-- テキスト、画像、QRコード、バーコードの印刷
-- 紙送り・カットなどを組み合わせたコマンドの実行
-- GUIでのコマンド編集、JSON／XMLプレビュー、テンプレート保存
-- HTTP API・OSCによるTouchDesigner、Max/MSP、自作プログラムとの連携
-- 画像のリサイズ、Floyd–Steinbergディザリング、モノクロ／16階調BMPへの変換
-- 印刷要求を順番に処理するキュー
+## Features
 
-## 構成
+- Print text, images, QR codes, and barcodes
+- Combine printing, paper feed, and cutting commands
+- Edit commands, preview JSON/XML, and save templates in the GUI
+- Connect TouchDesigner, Max/MSP, or custom software through HTTP or OSC
+- Resize images, apply Floyd–Steinberg dithering, and convert to monochrome or 16-level grayscale BMP
+- Process print requests sequentially through a queue
+
+## Architecture
 
 ```text
 GUI / HTTP / OSC
        ↓
 Node.js + Hono
        ↓
-画像変換（Sharp）→ XML生成（CITIZEN SDK）
+Image processing (Sharp) → XML generation (CITIZEN SDK)
        ↓
-プリンタのXML Printサービス
+Printer's XML Print service
 ```
 
-GUIはVue 3 + Vite、サーバーはTypeScriptです。
+The GUI uses Vue 3 and Vite. The server is written in TypeScript.
 
-## 必要なもの
+## Requirements
 
-- Node.js 22以上、pnpm 9.15.0
-- XML Printサービスを利用できるCITIZENプリンタと、同じLAN上のPC
-- CITIZEN POS Print SDK（JavaScript）の `cxmlp-api.js`
+- Node.js 22 or later and pnpm 9.15.0
+- A CITIZEN printer with an accessible XML Print service, and a computer on the same LAN
+- `cxmlp-api.js` from the CITIZEN POS Print SDK for JavaScript
 
-SDKは独自の使用許諾に従います。[公式ダウンロードページ](https://www.citizen-systems.co.jp/printer/download/sdk/)と[第三者ソフトウェアについて](THIRD_PARTY_NOTICES.md)を確認してください。本リポジトリにはSDKを同梱していません。使用許諾に同意して公式配布物を入手し、`Library/cxmlp-api.js` を次の手順で配置します。
+The SDK has its own license. See the [official download page](https://www.citizen-systems.co.jp/printer/download/sdk/) and [third-party notices](THIRD_PARTY_NOTICES.md). **The SDK is not included in this repository.** Review and accept the vendor's terms, obtain the official distribution, and install its `Library/cxmlp-api.js` file as shown below.
 
-## 起動する
+## Getting started
 
 ```bash
 git clone https://github.com/ie3jp/ThermalPrinterAPI.git
@@ -47,27 +49,27 @@ pnpm sdk:install /path/to/CSJJavaScriptPOSSDK/Library/cxmlp-api.js
 PRINTER_URL=http://192.168.1.100:8080/ pnpm dev
 ```
 
-- GUI：`http://localhost:5173`
-- HTTP API：`http://localhost:3456`
-- OSC：UDP `9350`（現行コードの既定値）
+- GUI: `http://localhost:5173`
+- HTTP API: `http://localhost:3456`
+- OSC: UDP `9350` (the current default)
 
-GUIの「プリンタURL」に `http://プリンタのIPアドレス:8080/` を入力してください。空欄の場合とOSCでの印刷には、起動時の `PRINTER_URL` 環境変数が使われます。既定値は `http://127.0.0.1:8080/` です。`.env` の自動読み込みは行いません。
+Enter `http://<printer-ip>:8080/` in the GUI's printer URL field. When the field is empty, and for OSC printing, the server uses the `PRINTER_URL` environment variable set at startup. Its default is `http://127.0.0.1:8080/`. `.env` files are not loaded automatically.
 
-`PORT` と `OSC_PORT` は環境変数で変更できます。
+Use the `PORT` and `OSC_PORT` environment variables to change the listening ports.
 
 ```bash
 PRINTER_URL=http://192.168.1.100:8080/ OSC_PORT=9000 pnpm dev
 ```
 
-GUIのMax/MSP用サンプルは9000番を案内するため、そのまま使う場合は上記のようにOSCポートを合わせてください。APIのポートを変更する場合は、`vite.config.ts` のプロキシ設定やクライアント側の接続先も合わせます。API起動時にポートが使用中だと次の空きポートを探すため、実際のポートは起動ログを確認してください。
+The Max/MSP examples shown in the GUI use port 9000. To use them unchanged, set the OSC port as above. If you change the HTTP API port, also update the proxy in `vite.config.ts` and any client connection settings. If the API port is already in use, the server tries the next available port; check the startup log for the actual port.
 
-認証なしでLANから印刷できる開発・展示用ツールです。信頼できるネットワークで使用し、インターネットへ直接公開しないでください。
+This tool is intended for development and exhibitions and allows printing over the LAN without authentication. Use it on a trusted network and do not expose the server directly to the internet.
 
-## HTTP APIの例
+## HTTP API examples
 
-### テキストとカット
+### Text and cutting
 
-`printerUrl` は実機のアドレスに置き換えます。
+Replace `printerUrl` with your printer's address.
 
 ```bash
 curl http://localhost:3456/api/print \
@@ -82,9 +84,9 @@ curl http://localhost:3456/api/print \
   }'
 ```
 
-### 画像
+### Images
 
-同じ `commands` 配列に画像コマンドを追加できます。`data` は画像URLまたはBase64文字列を受け付けます。
+Add an image command to the same `commands` array. `data` accepts an image URL or a Base64 string.
 
 ```json
 {
@@ -96,43 +98,43 @@ curl http://localhost:3456/api/print \
 }
 ```
 
-`mono` は1bitモノクロ、`gray` は4bit・16階調です。576ドットは80mm用紙を想定した基準値です。用紙幅とプリンタの対応に合わせて指定してください。BMP入力は変換を迂回するため、適切な形式・サイズをあらかじめ用意します。
+`mono` produces 1-bit monochrome images; `gray` produces 4-bit, 16-level grayscale images. The reference width of 576 dots assumes 80 mm paper. Adjust it to your paper width and printer capabilities. BMP input bypasses conversion, so prepare it in a suitable format and size beforehand.
 
-### 接続確認とXMLの確認
+### Connection checks and XML preview
 
-- `GET /health`：APIサーバーの稼働確認
-- `GET /api/status?printerUrl=...`：プリンタとの通信確認
-- `POST /api/export/xml`：印刷と同じコマンド形式からXMLを生成
+- `GET /health`: check whether the API server is running
+- `GET /api/status?printerUrl=...`: check communication with the printer
+- `POST /api/export/xml`: generate XML from the same command format used for printing
 
-`/api/status` は用紙残量などすべての実機状態を取得するものではありません。
+`/api/status` does not report every hardware condition, such as the amount of paper remaining.
 
 ## OSC
 
-送信先はAPIサーバーを実行するPCのIPアドレス、既定ポートはUDP 9350です。
+Send OSC messages to the IP address of the computer running the API server. The default port is UDP 9350.
 
-| アドレス | 主な引数 |
+| Address | Main arguments |
 | --- | --- |
-| `/print/text` | 文字列、配置、属性、横倍率、縦倍率 |
-| `/print/image` | Base64画像、幅、配置、モード |
-| `/print/qrcode` | 文字列、モジュールサイズ、誤り訂正レベル、配置 |
-| `/print/barcode` | 文字列、種類、高さ、幅、配置、文字位置 |
-| `/print/feed` | 紙送り量 |
-| `/print/cut` | カット方法 |
-| `/print/json` | コマンド配列のJSON文字列 |
-| `/print/file` | サーバー上のJSONファイルのパス |
+| `/print/text` | Text, alignment, attribute, horizontal scale, vertical scale |
+| `/print/image` | Base64 image, width, alignment, mode |
+| `/print/qrcode` | Text, module size, error correction level, alignment |
+| `/print/barcode` | Text, type, height, width, alignment, text position |
+| `/print/feed` | Feed amount |
+| `/print/cut` | Cut method |
+| `/print/json` | Command array as a JSON string |
+| `/print/file` | Path to a JSON file on the server |
 
-テキストやJSONなどの文字列は、TouchDesignerではOSC Out DAT等から送信できます。Max/MSPの例は [examples/PrintAPI-example.maxpat](examples/PrintAPI-example.maxpat) を参照し、送信先ポートを合わせてください。
+In TouchDesigner, strings such as text or JSON can be sent using OSC Out DAT. For Max/MSP, see [examples/PrintAPI-example.maxpat](examples/PrintAPI-example.maxpat) and match the destination port to your server.
 
-## サンプル・詳細資料
+## Examples and documentation
 
-- [APIリファレンス](API_REFERENCE.md)
-- [CLIサンプル](examples/)
-- [コマンド一覧](docs/COMMANDS.md)
-- [設計時の仕様書](docs/SPECIFICATION.md)
+- [API reference](API_REFERENCE.md)
+- [CLI examples](examples/)
+- [Command list](docs/COMMANDS.md)
+- [Original design specification](docs/SPECIFICATION.md)
 
-`docs/TASKS.md`、`docs/QA.md`、`docs/XML_FLOW.md` は開発途中の記録です。未完了表記やポート番号、ファイル構成が現在の実装と異なる場合があります。まずこのREADMEと実装を参照してください。
+Supporting documentation is primarily in Japanese. `docs/TASKS.md`, `docs/QA.md`, and `docs/XML_FLOW.md` are development records. Their task statuses, port numbers, or file layouts may differ from the current implementation. Refer to this README and the source code first.
 
-## ビルド・確認
+## Building and checks
 
 ```bash
 pnpm test
@@ -141,22 +143,22 @@ pnpm build
 pnpm start
 ```
 
-ビルド後は `http://localhost:3456` でGUIとAPIを配信します。
+After building, the server serves both the GUI and API at `http://localhost:3456`.
 
-macOSアプリをローカルで作成する場合：
+To build a macOS application locally:
 
 ```bash
 pnpm package:mac
 ```
 
-出力先は `release/PrintAPI.app`。現在のスクリプトはApple Silicon向けNode.jsを同梱し、Terminalでサーバーを起動してブラウザを開きます。署名・公証済みのアプリではありません。生成物にはCITIZEN SDKが含まれるため、そのまま一般配布しないでください。
+The output is `release/PrintAPI.app`. The current script bundles Node.js for Apple Silicon, starts the server in Terminal, and opens a browser. The app is not signed or notarized. **The generated application contains the CITIZEN SDK; do not redistribute it as-is.**
 
-実機の印字品質や動作は、プリンタ・用紙・ネットワーク環境で確認してください。
+Verify print quality and behavior with your actual printer, paper, and network environment.
 
-## ライセンス
+## License
 
-IE3が作成したコードは [ISC License](LICENSE) で公開しています。CITIZEN SDK・参考サンプル・旧リポジトリの履歴・過去の配布アプリは含めていません。
+Code written by IE3 is released under the [ISC License](LICENSE). This repository excludes the CITIZEN SDK, vendor reference samples, the previous repository history, and previously distributed application builds.
 
-利用者が別途導入するSDKや依存ライブラリには、それぞれの使用許諾が適用されます。詳細は [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) を参照してください。
+SDKs installed separately and third-party dependencies remain subject to their respective licenses. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for details.
 
-制作：[IE3](https://ie3.jp/)
+Created by [IE3](https://ie3.jp/).
